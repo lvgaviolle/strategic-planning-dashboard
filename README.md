@@ -1,76 +1,79 @@
 # Northstar · Strategic Planning Dashboard
 
-> **Portfolio Edition** — aplicação demonstrativa e independente construída em Blazor Web App (.NET 9).
+> **Portfolio Edition** — painel demonstrativo independente em **C# / Blazor Web App (.NET 9)**, com persistência SQLite, histórico mensal e testes automatizados.
 
-O **Northstar Planning Studio** é um painel de metas e indicadores com foco em clareza visual e regras de acompanhamento. O objetivo é apresentar habilidades de desenvolvimento full stack de forma segura, usando **somente código criado para este portfólio e dados inventados**.
+## Sobre o projeto
+
+O **Northstar Planning Studio** é uma aplicação de portfólio desenvolvida de forma independente para demonstrar arquitetura .NET, componentes interativos, persistência, validação e visualização de metas. **Todas as unidades, metas, nomes e métricas são fictícios.** Não contém código, dados, marcas, credenciais, esquemas ou integrações de empregadores.
 
 ## Funcionalidades
 
-- Dashboard responsivo com cartões de desempenho e acompanhamento de metas.
-- Filtros combinados por unidade, área e busca textual.
-- Comparação de previsto e realizado com barras de progresso.
-- Classificação automática: **atingida** (>= 100%), **em atenção** (>= 80%) e **abaixo da meta** (< 80%).
-- Cadastro de metas com validação de formulário.
-- Edição de realizado e inativação/reativação de metas.
-- Restauração do conjunto fictício de exemplo.
-- Interface em português brasileiro com formatação de moeda, percentual e quantidade.
+- Dashboard responsivo, em português brasileiro, com indicadores de desempenho.
+- Filtros por período, unidade, área e busca textual.
+- Histórico de seis meses com visualização gráfica de atingimento médio.
+- Cadastro de metas e atualização do realizado com persistência SQLite.
+- Ativação, inativação e restauração confirmada dos dados fictícios.
+- Regras isoladas de cálculo de progresso e testes unitários.
+- GitHub Actions para build e testes.
 
-## Tecnologias
-
-| Camada | Tecnologia |
-| --- | --- |
-| UI | Razor Components, Blazor Interactive Server, HTML, CSS |
-| Backend | C# / ASP.NET Core 9 |
-| Estado | Serviço Scoped com armazenamento em memória |
-| Qualidade | GitHub Actions — restore e build |
-
-**Não há conexão com banco de dados, API financeira, serviços externos ou sistemas empresariais.** Os dados são descartáveis e reiniciados em uma nova sessão.
+**Regra de cálculo:** cada meta possui seu próprio previsto e realizado. O progresso individual é realizado / previsto × 100; no indicador histórico agregado, cada progresso é limitado a 100% e todos possuem pesos iguais. Valores em reais, quantidades e percentuais não são somados indiscriminadamente. O escopo demonstrativo assume que maior realizado significa melhor resultado.
 
 ## Executar localmente
 
-Pré-requisito: **SDK .NET 9** instalado.
+Pré-requisito: **SDK .NET 9**.
 
-~~~bash
-git clone https://github.com/lvgaviolle/strategic-planning-dashboard.git
-cd strategic-planning-dashboard
-dotnet restore
-dotnet run
+~~~powershell
+dotnet restore StrategicPlanningDashboard.csproj
+dotnet run --project StrategicPlanningDashboard.csproj
 ~~~
 
-Abra no navegador a URL local exibida no terminal (normalmente http://localhost:5000 ou a porta configurada pelo .NET).
+O terminal informa a URL do servidor, geralmente **http://localhost:5000**. O banco SQLite é criado automaticamente em `App_Data/northstar.db` e recebe dados de exemplo na primeira execução.
 
-## Organização
+Para rodar os testes:
+
+~~~powershell
+dotnet restore tests/StrategicPlanningDashboard.Tests/StrategicPlanningDashboard.Tests.csproj
+dotnet test tests/StrategicPlanningDashboard.Tests/StrategicPlanningDashboard.Tests.csproj
+~~~
+
+O banco **não deve ser enviado ao GitHub** (o `.gitignore` exclui a pasta `App_Data/`).
+
+### Se você usou Download ZIP
+
+1. Interrompa a aplicação antiga no PowerShell com **Ctrl+C**.
+2. Baixe um novo ZIP da branch `main` em **Code → Download ZIP**.
+3. Extraia e abra a pasta atualizada.
+4. Execute os comandos `dotnet restore` e `dotnet run` acima.
+
+O ZIP antigo usava dados em memória e **não possuía banco SQLite**. Ele não contém alterações persistidas para migrar.
+
+## Estrutura
 
 ~~~text
 Components/
-  Layout/            Navegação e estrutura visual
-  Pages/             Dashboard e cadastro/gestão
-Models/               Entidades e validações
-Services/             Dados de demonstração e operações
-wwwroot/              Estilos
-.github/workflows/    Build automatizado
+  Layout/          Navegação e layout
+  Pages/           Visão geral e gestão de metas
+Models/            Entidades e validações
+Services/
+  PlanningStore.cs SQLite local e dados sintéticos
+  GoalMetrics.cs   Consolidação normalizada
+tests/             Testes de regra e persistência
+wwwroot/           Estilos responsivos
+.github/workflows/ Pipeline CI
 ~~~
 
-## Limitações intencionais
+## Aviso de segurança e demonstração pública
 
-- Sem autenticação: qualquer execução local é uma demonstração.
-- Sem persistência: alterações são temporárias e ficam no circuito/sessão do Blazor Server.
-- A primeira versão acompanha o mês corrente; os indicadores usam a lógica **quanto maior, melhor**.
-- Não há cálculo consolidado de percentuais entre unidades: cada indicador é apresentado individualmente.
-- Esta edição **não reproduz interfaces, banco, código, marcas, dados ou regras proprietárias** de projetos profissionais.
+**Esta versão é para execução local e ambientes controlados.** Não existe autenticação e as alterações são feitas em um banco compartilhado por todo o processo. **Não exponha diretamente o aplicativo na internet:** visitantes poderiam modificar ou restaurar os dados. Antes de implantar uma demo pública é necessário implementar acesso somente leitura ou sessões isoladas, limitar recursos e definir persistência adequada ao provedor.
 
-## English summary
+Para mudar o caminho do banco, defina a variável de ambiente `NORTHSTAR_DB_PATH` antes de executar. Em ambientes de hospedagem, certifique-se de utilizar volume persistente se desejar preservar o banco.
 
-A standalone **Blazor .NET 9 interactive dashboard** featuring goal management, multi-dimensional filters, KPI progress visualization, validation, and in-memory demo data. Built from scratch as a safe technical portfolio sample, with no proprietary company code or information.
+## Qualidade e próximos passos
 
-## Próximos passos
+O workflow de GitHub Actions compila a aplicação e roda testes de regra e integração com SQLite. O resultado de CI deve ser conferido na aba **Actions**; a presença do workflow não garante que uma execução tenha sido concluída.
 
-- Testes automatizados de regras de metas.
-- Persistência opcional em SQLite.
-- Autenticação demonstrativa com perfis.
-- Histórico mensal e comparativos.
-- Capturas de tela e publicação de uma demonstração acessível.
+Próximos incrementos planejados: comparação por indicador entre meses, documentação com screenshots e preparação de uma demo pública segura.
 
----
+## English overview
 
-**Status:** MVP demonstrativo, primeira versão. Publicação pública somente após revisão final do autor.
+An independent **Blazor .NET 9** portfolio app featuring an interactive KPI dashboard, monthly history, SQLite persistence, business rules, responsive UI and automated tests. Contains synthetic demo data only, with no proprietary code or company information.
