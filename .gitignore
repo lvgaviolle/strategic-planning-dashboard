@@ -1,0 +1,20 @@
+# .NET / Visual Studio
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.cache
+TestResults/
+artifacts/
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+**/secrets.json
