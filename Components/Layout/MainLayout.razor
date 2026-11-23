@@ -1,0 +1,52 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="/" class="brand" aria-label="Ir para a visão geral">
+            <span class="brand-icon">◆</span>
+            <span>
+                <strong>Northstar</strong>
+                <small>PLANNING STUDIO</small>
+            </span>
+        </a>
+
+        <div class="nav-caption">MENU PRINCIPAL</div>
+        <nav class="side-nav" aria-label="Navegação principal">
+            <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">
+                <span class="nav-glyph" aria-hidden="true">◫</span>
+                Visão geral
+            </NavLink>
+            <NavLink href="/metas" class="nav-link">
+                <span class="nav-glyph" aria-hidden="true">◎</span>
+                Gestão de metas
+            </NavLink>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <span class="sidebar-bottom-icon">✦</span>
+            <div>
+                <strong>Portfolio Edition</strong>
+                <small>Aplicação independente</small>
+            </div>
+        </div>
+    </aside>
+
+    <div class="workspace">
+        <header class="topbar">
+            <div class="topbar-heading">Northstar <span>/ Planejamento</span></div>
+            <div class="topbar-right">
+                <span class="demo-label"><span class="demo-dot"></span> Ambiente de demonstração</span>
+                <span class="avatar" aria-label="Usuário de demonstração">DE</span>
+            </div>
+        </header>
+
+        <main class="page-container">
+            @Body
+        </main>
+
+        <footer class="footer">
+            <span>Northstar Planning Studio · Projeto demonstrativo independente</span>
+            <span>Dados fictícios · Sem integrações corporativas</span>
+        </footer>
+    </div>
+</div>
