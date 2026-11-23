@@ -5,7 +5,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddScoped<PlanningStore>();
+
+// SQLite is local to this independent demo. Override the path with NORTHSTAR_DB_PATH.
+var configuredPath = builder.Configuration["NORTHSTAR_DB_PATH"];
+var databaseFile = string.IsNullOrWhiteSpace(configuredPath)
+    ? Path.Combine(builder.Environment.ContentRootPath, "App_Data", "northstar.db")
+    : Path.GetFullPath(configuredPath);
+
+// Create and seed once on startup; subsequent circuits read the same database.
+_ = new PlanningStore(databaseFile);
+builder.Services.AddScoped(_ => new PlanningStore(databaseFile));
 
 var app = builder.Build();
 

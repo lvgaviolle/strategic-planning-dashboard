@@ -5,4 +5,13 @@
     <Nullable>enable</Nullable>
     <RootNamespace>StrategicPlanningDashboard</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.23" />
+  </ItemGroup>
+  <!-- The demo's automated tests live inside the repo but are a separate project. -->
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <Content Remove="tests/**" />
+    <None Remove="tests/**" />
+  </ItemGroup>
 </Project>
