@@ -84,8 +84,18 @@
             <input type="checkbox" @bind="ShowInactive" />
             Mostrar inativos
         </label>
-        <button type="button" class="button button-quiet button-small" @onclick="RestoreDemo">Restaurar dados de exemplo</button>
+        <button type="button" class="button button-quiet button-small" @onclick="() => ShowResetConfirmation = !ShowResetConfirmation">Restaurar dados de exemplo</button>
     </div>
+    @if (ShowResetConfirmation)
+    {
+        <div class="reset-warning" role="alert">
+            <div><strong>Substituir todos os dados?</strong><p>Essa ação apagará suas metas locais e restaurará os dados fictícios dos últimos seis meses.</p></div>
+            <div class="reset-actions">
+                <button class="button button-quiet button-small" type="button" @onclick="() => ShowResetConfirmation = false">Cancelar</button>
+                <button class="button button-danger button-small" type="button" @onclick="RestoreDemo">Confirmar restauração</button>
+            </div>
+        </div>
+    }
     @if (FilteredGoals.Count == 0)
     {
         <div class="empty-state"><h3>Nenhuma meta neste filtro</h3><p>Ative a visualização de inativos ou crie uma nova meta.</p></div>
@@ -139,13 +149,14 @@
         </div>
     }
 </section>
-<div class="info-note"><span aria-hidden="true">ⓘ</span> Os dados não são gravados em banco. Recarregar a página inicia uma nova sessão demonstrativa.</div>
+<div class="info-note"><span aria-hidden="true">ⓘ</span> As alterações são persistidas em SQLite local. Este painel é uma demonstração sem autenticação: use somente em ambiente controlado.</div>
 
 @code {
     private static readonly CultureInfo BrazilianCulture = CultureInfo.GetCultureInfo("pt-BR");
     private GoalDraft Draft = new();
     private bool ShowForm;
     private bool ShowInactive;
+    private bool ShowResetConfirmation;
     private string PeriodLabel => DateTime.Today.ToString("MMMM 'de' yyyy", BrazilianCulture);
     private List<Goal> FilteredGoals => Store.Goals
         .Where(g => g.Month == DateTime.Today.Month && g.Year == DateTime.Today.Year)
@@ -174,6 +185,7 @@
     private void RestoreDemo()
     {
         Store.RestoreDemo();
+        ShowResetConfirmation = false;
         ShowForm = false;
         Draft = new GoalDraft();
     }
