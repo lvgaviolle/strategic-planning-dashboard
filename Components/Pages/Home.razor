@@ -30,6 +30,15 @@
     <div class="filter-title"><span>☷</span> Filtros <small>Refine os resultados exibidos</small></div>
     <div class="filter-grid">
         <label class="field-label">
+            Período
+            <select class="field-input" @bind="SelectedPeriodKey">
+                @foreach (var period in AvailablePeriods)
+                {
+                    <option value="@PeriodKey(period)">@period.ToString("MMMM/yyyy", BrazilianCulture)</option>
+                }
+            </select>
+        </label>
+        <label class="field-label">
             Unidade
             <select class="field-input" @bind="SelectedBranch">
                 <option value="Todas">Todas as unidades</option>
@@ -55,6 +64,28 @@
         </label>
     </div>
 </div>
+
+<section class="content-card trends-card" aria-label="Histórico mensal">
+    <div class="content-card-header">
+        <div>
+            <h2>Evolução das metas</h2>
+            <p>Atingimento médio normalizado, com cada indicador limitado a 100% no consolidado.</p>
+        </div>
+        <span class="count-pill">Últimos 6 meses</span>
+    </div>
+    <div class="trend-bars">
+        @foreach (var item in TrendData)
+        {
+            <div class="trend-row">
+                <span class="trend-month">@item.Period.ToString("MMM/yy", BrazilianCulture)</span>
+                <div class="trend-track">
+                    <div class="trend-fill" style="width: @(item.AverageProgress.ToString(CultureInfo.InvariantCulture))%"></div>
+                </div>
+                <strong>@item.AverageProgress.ToString("N1", BrazilianCulture)%</strong>
+            </div>
+        }
+    </div>
+</section>
 
 <div class="metric-grid" aria-label="Resumo das metas">
     <div class="metric-card">
@@ -133,28 +164,42 @@
     }
 </section>
 
-<div class="info-note"><span aria-hidden="true">ⓘ</span> Esta aplicação é um exemplo independente. Os dados são fictícios e as alterações ficam apenas na sua sessão.</div>
+<div class="info-note"><span aria-hidden="true">ⓘ</span> Esta aplicação usa dados fictícios. As alterações são salvas em SQLite local e compartilhadas entre as sessões deste servidor. Não publique sem autenticação.</div>
 
 @code {
     private static readonly CultureInfo BrazilianCulture = CultureInfo.GetCultureInfo("pt-BR");
     private string SelectedBranch = "Todas";
     private string SelectedArea = "Todas";
     private string SearchTerm = "";
+    private string SelectedPeriodKey = PeriodKey(DateTime.Today);
+    private static string PeriodKey(DateTime period) => period.ToString("yyyy-MM", CultureInfo.InvariantCulture);
+    private DateTime SelectedPeriod =>
+        DateTime.TryParseExact(SelectedPeriodKey + "-01", "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)
+            ? value : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private List<DateTime> AvailablePeriods => Enumerable.Range(0, 6)
+        .Select(i => new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-i))
+        .ToList();
 
-    private string PeriodLabel => DateTime.Today.ToString("MMMM 'de' yyyy", BrazilianCulture);
-    private List<Goal> VisibleGoals => Store.Goals
-        .Where(g => g.IsActive && g.Month == DateTime.Today.Month && g.Year == DateTime.Today.Year)
+    private List<PeriodSummary> TrendData => AvailablePeriods.AsEnumerable().Reverse()
+        .Select(period => GoalMetrics.Summarize(FilteredAllPeriods, period))
+        .ToList();
+
+    private IEnumerable<Goal> FilteredAllPeriods => Store.Goals
         .Where(g => SelectedBranch == "Todas" || g.Branch == SelectedBranch)
         .Where(g => SelectedArea == "Todas" || g.Area == SelectedArea)
         .Where(g => string.IsNullOrWhiteSpace(SearchTerm)
             || g.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-            || g.Owner.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            || g.Owner.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
+    private string PeriodLabel => SelectedPeriod.ToString("MMMM 'de' yyyy", BrazilianCulture);
+    private List<Goal> VisibleGoals => FilteredAllPeriods
+        .Where(g => g.IsActive && g.Month == SelectedPeriod.Month && g.Year == SelectedPeriod.Year)
         .OrderBy(g => g.Progress)
         .ToList();
 
-    private int Achieved => VisibleGoals.Count(g => g.Progress >= 100);
+        private int Achieved => VisibleGoals.Count(g => g.Progress >= 100);
     private int Attention => VisibleGoals.Count(g => g.Progress >= 80 && g.Progress < 100);
     private int Below => VisibleGoals.Count(g => g.Progress < 80);
-    private decimal AverageProgress => VisibleGoals.Count == 0 ? 0 : VisibleGoals.Average(g => g.Progress);
+    private decimal AverageProgress => GoalMetrics.Summarize(VisibleGoals, SelectedPeriod).AverageProgress;
     private decimal ShareOf(int number) => VisibleGoals.Count == 0 ? 0 : Math.Round(number * 100m / VisibleGoals.Count, 1);
 }
