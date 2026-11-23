@@ -167,3 +167,29 @@ h1 { margin: 0; color: #172039; font-size: clamp(26px, 3vw, 32px); letter-spacin
   .form-actions { padding: 20px 16px 0; }
   .demo-label { display: none; }
 }
+
+/* Historical attainment visualisation */
+.filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0,1.15fr) minmax(0,1.15fr); }
+.trends-card { margin-top: 22px; }
+.trend-bars { padding: 0 24px 23px; display: grid; gap: 12px; }
+.trend-row { display: grid; grid-template-columns: 65px minmax(0, 1fr) 60px; align-items: center; gap: 14px; }
+.trend-month { color: #818ba1; text-transform: capitalize; font-size: 11px; font-weight: 700; }
+.trend-track { height: 14px; border-radius: 8px; background: #f0edf9; overflow: hidden; }
+.trend-fill { height: 100%; background: linear-gradient(90deg,#a097ff,#6753e9); border-radius: inherit; transition: width .2s; }
+.trend-row strong { text-align: right; color: #53488f; font-size: 11px; }
+.reset-warning { margin: 0 24px 18px; padding: 15px 17px; border: 1px solid #f4ccba; border-radius: 10px; background: #fffaf5; display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+.reset-warning strong { color: #9a5539; font-size: 12px; }
+.reset-warning p { color: #986b55; margin: 5px 0 0; font-size: 11px; line-height: 1.5; }
+.reset-actions { display: flex; gap: 9px; }
+.button-danger { background: #b65246; color: #fff; }
+.button-danger:hover { background: #9f4135; }
+@media(max-width:1120px) { .filter-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .filter-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:480px) {
+ .filter-grid { grid-template-columns: 1fr; }
+ .field-search { grid-column: auto; }
+ .trend-bars { padding: 0 15px 18px; }
+ .trend-row { grid-template-columns: 52px minmax(0,1fr) 52px; gap: 8px; }
+ .reset-warning { flex-direction: column; align-items: flex-start; margin: 0 16px 18px; }
+ .reset-actions { width: 100%; flex-wrap: wrap; }
+}
